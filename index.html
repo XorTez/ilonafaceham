@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>RAM Stress Test</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #222; color: white; }
+        #status { font-size: 24px; margin: 20px; color: #00ff00; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background-color: red; color: white; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Test de Memorie RAM</h1>
+    <p>Apasă butonul pentru a începe alocarea forțată a memoriei.</p>
+    
+    <div id="status">Așteptare...</div>
+    <button onclick="startTest()">ÎNCEPE TESTUL</button>
+
+    <script>
+        let memoryHog = []; // Aici vom stoca datele
+
+        function startTest() {
+            document.getElementById('status').innerText = "Se alocă memorie... Nu închide pagina!";
+            document.querySelector('button').disabled = true;
+
+            // Funcția care rulează în buclă
+            function allocateMemory() {
+                try {
+                    // Creăm un array (matrice) mare de aproximativ 10MB - 50MB
+                    // 1 caracter în JS ocupă 2 bytes. 
+                    // 25.000.000 caractere = ~50 MB per array
+                    let bigArray = new Array(25000000).join('A');
+                    
+                    // Îl salvăm în memoria globală ca să nu fie șters de garbage collector
+                    memoryHog.push(bigArray);
+
+                    // Actualizăm textul ca să vedem că merge
+                    let currentRAM = (memoryHog.length * 50) / 1024;
+                    document.getElementById('status').innerText = "Memorie alocată: ~" + currentRAM.toFixed(2) + " GB";
+
+                    // Amânăm următoarea alocare cu 10 milisecunde
+                    // Asta îi dă timp browserului să randeze textul pe ecran
+                    setTimeout(allocateMemory, 10);
+
+                } catch (error) {
+                    // Dacă browserul crapă sau dă eroare, o prindem aici
+                    document.getElementById('status').innerText = "Eroare: Memoria a fost epuizată! Browserul a ajuns la limită.";
+                    document.getElementById('status').style.color = "red";
+                    console.error(error);
+                }
+            }
+
+            // Pornim bucla
+            allocateMemory();
+        }
+    </script>
+
+</body>
+</html>
